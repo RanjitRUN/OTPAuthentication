@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Register</title>
+    <style>
+        body{
+            background-color: rgb(193, 156, 228);
+        }
+       form {
+  position: fixed; /* Stay in place */
+  left: 30%;
+  top: 10%;
+  width: 300px; /* Full width */
+  height: 200px; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(55, 56, 95); /* Fallback color */
+  padding: 60px;
+  color: aliceblue;
+}
+input[type=text], input[type=password] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+input[type=submit]{
+    margin-top:50px;
+    width:100px;
+    height:50px;
+    font-size: 20px;
+    border-radius: 20px;
+    background-color: rgb(33, 70, 70);
+    color: wheat;
+}
+.radio-box{
+    margin-top:-30px;
+}
+h2{
+    margin-top: -30px;
+    margin-left: 30px;
+    color: rgb(213, 217, 221);
+}
+    </style>
+</head>
+<body>
+    {% block includes %}
+
+    
+    <form action="/otp/{{id}}/" method="post">
+        <h2>OTP VERIFICATION:</h2>
+        {% csrf_token %}
+        <label for="otp">OTP:         </label>
+        <input id="otp" type="text" name="otp" placeholder="Enter OTP">
+        <input type="submit" value="login" value="Verify OTP">
+    </form>
+
+
+    <p id="timer" style="display: none;"></p>
+    <button id="resend-otp" style="display: none;" disabled>Resend OTP</button>
+
+        
+
+        <script>
+            const timerElement = document.getElementById('timer');
+            const resendButton = document.getElementById('resend-otp');
+            const csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+            const otpForm = document.querySelector('form');
+        
+            function startTimer(duration) {
+              let timer = duration;
+              let minutes;
+              let seconds;
+        
+              const interval = setInterval(() => {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+        
+                minutes = minutes < 10 ? `0${minutes}` : minutes;
+                seconds = seconds < 10 ? `0${seconds}` : seconds;
+        
+                timerElement.textContent = `Resend OTP in ${minutes}:${seconds}`;
+        
+                if (--timer < 0) {
+                  clearInterval(interval);
+                  timerElement.style.display = 'none';
+                  resendButton.style.display = 'inline-block';
+                  resendButton.removeAttribute('disabled');
+                }
+              }, 1000);
+            }
+        
+            function onResendClick() {
+              timerElement.style.display = 'block';
+              resendButton.style.display = 'none';
+              otpForm.submit();
+            }
+        
+            // Check if the resend button should be activated on page load
+            if ('{{ resend_enabled }}' === 'True') {
+              startTimer({{ time_left }});
+            } else {
+              timerElement.style.display = 'none';
+              resendButton.style.display = 'inline-block';
+              resendButton.removeAttribute('disabled');
+            }
+        
+            // Attach click event to the resend button
+            resendButton.addEventListener('click', onResendClick);
+          </script>
+        
+        {% endblock includes %}
+
+
+</body>
+</html>
